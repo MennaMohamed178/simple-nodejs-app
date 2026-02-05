@@ -12,7 +12,7 @@ jobs:
       - name: BuildDockerImage
         run: docker build -t menamreda83/gcamproject:v1 .
       - name: PushImage
-        run: docker push menamreda83/gcamproject:v1 .
+        run: docker push menamreda83/gcamproject:v1 
   test-process:
     runs-on: ubuntu-latest
     steps:
