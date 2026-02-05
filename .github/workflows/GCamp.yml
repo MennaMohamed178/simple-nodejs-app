@@ -1,0 +1,42 @@
+on: [push]
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: LoginDockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERUSER }}
+          password: ${{ secrets.AWS_DOCKERTOKEN }}
+      - name: BuildDockerImage
+        run: docker build -t menamreda83/gcamproject:v1 .
+      - name: PushImage
+        run: docker push menamreda83/gcamproject:v1 .
+  test-process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: TestProcess
+        run: echo "Testing.."
+  deploy-process:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - name: Start deployment via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AWS_IP }}
+          username: ${{ secrets.AWS_USER }}
+          key: ${{ secrets.AWS_PRIVETKEY }}
+          script: |
+             docker pull menamreda83/gcamproject:v1 
+             docker stop nodeApp || true 
+             docker rm nodeApp || true
+             docker run -p 8080:3000 --name nodeApp -d menamreda83/gcamproject:v1
+           
+          
+
+
+
+
+      
